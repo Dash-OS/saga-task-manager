@@ -1,0 +1,50 @@
+{
+  "name": "saga-task-manager",
+  "version": "0.0.1",
+  "description": "A Task Manager to help manage asynchronous tasks.",
+  "main": "dist/saga-task-manager.js",
+  "author": "Dash OS, LLC, Braden R. Napier, <brady.napier@dashos.net>",
+  "license": "MIT",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --require co-mocha",
+    "prepublish": "npm run build:prod",
+    "build:prod": "cross-env NODE_ENV=production BABEL_ENV=production babel-node config/scripts/build",
+    "build": "babel-node config/scripts/build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dash-OS/saga-task-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dash-OS/saga-task-manager/issues"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "redux-saga",
+    "task",
+    "fork",
+    "task manager",
+    "saga-process-manager",
+    "process"
+  ],
+  "devDependencies": {
+    "app-root-dir": "^1.0.2",
+    "babel-cli": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-plugin-lodash": "^3.2.11",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-babili": "^0.1.2",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babili-webpack-plugin": "^0.1.1",
+    "colors": "^1.1.2",
+    "cross-env": "^5.0.0",
+    "happypack": "^3.1.0",
+    "lodash-webpack-plugin": "^0.11.4",
+    "rimraf": "^2.6.1",
+    "webpack": "^2.6.1",
+    "webpack-node-externals": "^1.6.0",
+    "yargs": "^8.0.1"
+  }
+}

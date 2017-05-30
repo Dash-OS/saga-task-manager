@@ -1,0 +1,4 @@
+.git
+config
+node_modules
+yarn.lock
