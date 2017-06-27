@@ -1,6 +1,6 @@
 {
   "name": "saga-task-manager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A Task Manager to help manage asynchronous tasks.",
   "main": "dist/saga-task-manager.js",
   "author": "Dash OS, LLC, Braden R. Napier, <brady.napier@dashos.net>",
@@ -46,5 +46,8 @@
     "webpack": "^2.6.1",
     "webpack-node-externals": "^1.6.0",
     "yargs": "^8.0.1"
+  },
+  "dependencies": {
+    "redux-saga": "^0.15.3"
   }
 }

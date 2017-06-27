@@ -1,12 +1,12 @@
 export default function printLog(level, ...args) {
   if ( level === 'warn' || level === 'error' || level === 'info' || level === 'log' ) {
-    this.logger(`📟 [saga-task-manager] | ${this.getName()} | ${level.toUpperCase()} | ${args[0]}`)
+    this.logger(`${this.config.icon || ''} [saga-task-manager] | ${this.getName()} | ${level.toUpperCase()} | ${args[0]}`)
     for ( let entry of args.slice(1) ) {
       console[level](entry)
     }
   } else {
 
-    this.logger(`📟 [saga-task-manager] | ${this.getName()} | ${level}`)
+    this.logger(`${this.config.icon || ''} [saga-task-manager] | ${this.getName()} | ${level}`)
     for ( let entry of args ) {
       console.info(entry)
     }
