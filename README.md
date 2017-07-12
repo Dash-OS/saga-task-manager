@@ -22,6 +22,14 @@ yarn add saga-task-manager
 npm install --save saga-task-manager
 ```
 
+### Logging
+
+One helpful tool provided is the introspection of your tasks via the
+logging and introspection mechanisms.  This helps make sure that your
+sagas are performing as expected and helps track down runaway sagas.
+
+![](https://user-images.githubusercontent.com/15365418/28110828-62c05d0a-66a8-11e7-8526-ccfeda990f47.png)
+
 ### Simple Example
 
 ```js
