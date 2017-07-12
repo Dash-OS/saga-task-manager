@@ -8,13 +8,13 @@ import onKillWatcher from './sagas/onKillWatcher';
 
 const TaskManagers = new Map();
 
-const CreateSagaPromise = (promise, handler, oncancel) => {
-  const SagaPromise = new promise(handler);
+const CreateSagaPromise = (Prom, handler, oncancel) => {
+  const SagaPromise = new Prom(handler);
   SagaPromise[CANCEL] = oncancel;
   return SagaPromise;
 };
 
-const build_config = config => ({
+const buildConfig = config => ({
   name: 'SagaTaskMan',
   // should we cancel tasks if we schedule new tasks with same category, id?
   // if this is false then an error will be reported unless silent is true
@@ -32,7 +32,7 @@ const build_config = config => ({
 class SagaTaskMan {
   constructor(id, config) {
     this.id = id;
-    this.config = build_config(config);
+    this.config = buildConfig(config);
 
     this.tasks = new Map();
     this.handlers = {
@@ -120,42 +120,39 @@ class SagaTaskMan {
     }
   }
 
-  *onTaskComplete(category, id, fn, ...args) {
+  *onTaskComplete(category, id, fn) {
     const task = this.getTask(category, id);
     if (!fn) {
       return null;
     }
     if (!task || !task[TASK] || task.done === undefined) {
       return this.handleError(`Task Does Not Exist: ${category}.${id}`);
-    } else {
-      try {
-        yield task.done;
-      } finally {
-        let context, callback;
-        this.handleLog('info', 'Task Complete!', category, id);
-        return yield call(fn, category, id);
-      }
+    }
+    try {
+      yield task.done;
+    } finally {
+      this.handleLog('info', 'Task Complete!', category, id);
+      yield call(fn, category, id);
     }
   }
 
-  handleCancelled = (handler, ...args) => this.removeHandler(handler);
+  handleCancelled = handler => this.removeHandler(handler);
 
   *cancel(category, id) {
     if (!id) {
       return yield call([this, this.cancelCategory], category);
-    } else {
-      const categoryTasks = this.getCategory(category);
-      if (!categoryTasks) {
-        return;
-      }
-      return yield call([this, this.cancelTask], categoryTasks, category, id);
     }
+    const categoryTasks = this.getCategory(category);
+    if (!categoryTasks) {
+      return;
+    }
+    return yield call([this, this.cancelTask], categoryTasks, category, id);
   }
 
   *cancelCategory(category) {
     const categoryTasks = this.getCategory(category);
-    let tasks = [];
-    for (let [id, task] of categoryTasks) {
+    const tasks = [];
+    for (const [id, task] of categoryTasks) {
       tasks.push(
         yield fork([this, this.cancelTask], categoryTasks, category, id, task),
       );
@@ -164,8 +161,8 @@ class SagaTaskMan {
   }
 
   *cancelAll() {
-    let tasks = [];
-    for (let [category, categoryTasks] of this.tasks) {
+    const tasks = [];
+    for (const [category] of this.tasks) {
       tasks.push(yield fork([this, this.cancelCategory], category));
     }
     return tasks;
@@ -187,12 +184,11 @@ class SagaTaskMan {
     return task;
   }
 
-  *taskExists(category, id) {
+  taskExists(category, id) {
     if (this.getTask(category, id)) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   awaitHandler = handler => this.handlers.promises.get(handler);
@@ -228,7 +224,7 @@ class SagaTaskMan {
 
   getAllTasks = () => this.tasks;
 
-  saveTask = (category, id, task, taskArgs) => {
+  saveTask = (category, id, task) => {
     const categoryTasks = this.getCategory(category, true);
     if (categoryTasks.has(id)) {
       this.handleError(
@@ -301,7 +297,7 @@ class SagaTaskMan {
     }
     this.killed = true;
 
-    const kill_promise = this.handlers.promises
+    const killPromise = this.handlers.promises
       .get('onKilled')
       .then(r => {
         if (!this.deleted) {
@@ -322,15 +318,15 @@ class SagaTaskMan {
 
     this.handlers.resolvers.get('onKilled').resolve();
 
-    return kill_promise;
+    return killPromise;
   };
 }
 
 function createTaskManager(id, config) {
   if (TaskManagers.has(id)) {
-    const old_manager = TaskManagers.get(id);
-    if (!old_manager.killed) {
-      old_manager.kill();
+    const oldManager = TaskManagers.get(id);
+    if (!oldManager.killed) {
+      oldManager.kill();
     }
   }
   const taskman = new SagaTaskMan(id, config);
@@ -344,16 +340,16 @@ function killAllTaskManagers(reversed = true) {
   if (reversed) {
     managers = managers.reverse();
   }
-  const kill_promises = [];
-  for (let [managerID, manager] of managers) {
-    const kill_promise = manager.kill();
+  const killPromises = [];
+  for (const [managerID, manager] of managers) {
+    const killPromise = manager.kill();
     // manually mark deleted so no conflicts exists
     // while the kill resolves asynchronously.
     TaskManagers.delete(managerID);
     manager.deleted = true;
-    kill_promises.push(kill_promise);
+    killPromises.push(killPromise);
   }
-  return kill_promises.length > 0 && Promise.all(kill_promises);
+  return killPromises.length > 0 && Promise.all(killPromises);
 }
 
 export { createTaskManager, TaskManagers, killAllTaskManagers };
