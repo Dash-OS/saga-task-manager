@@ -30,8 +30,7 @@ import { cancelled, call } from 'redux-saga/effects';
 
 import SagaTaskMan from 'saga-task-manager';
 
-const tasks = createTaskManager(this.processID, {
-  name: 'MY_TASK_MANAGER',
+const tasks = createTaskManager('MY_TASK_MANAGER', {
   // log internal events? this will provide a summary
   // of running tasks and inform you of various events.
   log: true,
@@ -115,7 +114,7 @@ killAllTaskManagers()
 ### Introspection
 
 It can be helpful to know all your currently running tasks.  You can
-get all current task managers by simply importing the map.  This should 
+get all current task managers by simply importing the map.  This should
 only be used for introspection.
 
 ```js

@@ -33,7 +33,9 @@ class SagaTaskMan {
   constructor(id, config) {
     this.id = id;
     this.config = buildConfig(config);
-
+    if (!this.config.name) {
+      this.config.name = id;
+    }
     this.tasks = new Map();
     this.handlers = {
       promises: new Map(),
