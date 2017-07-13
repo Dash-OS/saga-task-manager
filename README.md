@@ -39,6 +39,10 @@ the task to aid in performance enhancements and debugging.
 
 ![](https://user-images.githubusercontent.com/15365418/28110828-62c05d0a-66a8-11e7-8526-ccfeda990f47.png)
 
+> **Note:** When logging is not enabled, the function that handles the
+> logging is removed completely. Logging itself can have a performance
+> impact and for obvious reasons should only be enabled in development.
+
 ### Simple Example
 
 ```js
