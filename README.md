@@ -1,14 +1,20 @@
 # saga-task-manager
 
-A Task Manager to help manage forked tasks from redux-saga.  Tasks have a
-"category" and "id" which is used to identify and ensure we don't run more
-than one of any given task.  
+A Task Manager to make working with `redux-saga` tasks easier to work with.  
 
-SagaTaskMan automatically cleans up when tasks have been completed by any means.  
-You can cancel, introspect, and register callback to occur when certain events
-occur within the task if desired.
+### Features / Summary
 
-> **IMPORTANT** This is not stable at this time.
+ - Tasks are created by category and id.  
+ - Tasks can be cancelled by category or id.  Cancelling a category will cancel all tasks that are apart of the given category.
+ - Scheduling a task which has already been scheduled will either
+ cancel the previous task or throw an error (depending on your configuration).
+ - Powerful logging capabilities help provide information about each
+ task, it's lifecycle, and what is really going on with your sagas.
+ - Easily kill all tasks across all created managers.  Essential for hot reloading of your sagas reliably.
+ - Powerful introspection / debugging capabilities.
+ - Tasks always run in their own context, detached (spawned) from
+ the caller.  Cancelling the creator of the task will not affect the
+ task itself unless cancelled in the sagas cancellation handler.
 
 ### Installation
 
@@ -28,6 +34,9 @@ One helpful tool provided is the introspection of your tasks via the
 logging and introspection mechanisms.  This helps make sure that your
 sagas are performing as expected and helps track down runaway sagas.
 
+When a given task completes, it will print the duration and result of
+the task to aid in performance enhancements and debugging.
+
 ![](https://user-images.githubusercontent.com/15365418/28110828-62c05d0a-66a8-11e7-8526-ccfeda990f47.png)
 
 ### Simple Example
@@ -41,6 +50,7 @@ import SagaTaskMan from 'saga-task-manager';
 const tasks = createTaskManager('MY_TASK_MANAGER', {
   // log internal events? this will provide a summary
   // of running tasks and inform you of various events.
+  // (default false)
   log: true,
   // collapse logs by default? (default true)
   logCollapsed: true,
@@ -74,7 +84,7 @@ function* mySaga() {
   /*  Task Creation:
       every time we create the task, any previous will be cancelled
       before the next one is run.  In the example below, the task will
-      be callled and cancelled and the final task will be the only task
+      be called and cancelled and the final task will be the only task
       left running.
   */
 
@@ -92,15 +102,14 @@ function* mySaga() {
   );
 
   /*  Task Cancellation:
-      If we want to cancel a task we can do so using the category/id or we can
-      cancel an entire category of tasks by just providing the category
+      If we want to cancel a task we can do so using the category/id or we can cancel an entire category of tasks by just providing the category
   */
 
   // cancel the entire "myCategory" category
-  yield call([Task, Task.cancel], 'myCategory');
+  yield call([tasks, tasks.cancel], 'myCategory');
 
   // cancel the task only
-  yield call([Task, Task.cancel], 'myCategory', 'myTaskID');
+  yield call([tasks, tasks.cancel], 'myCategory', 'myTaskID');
 }
 
 
@@ -127,4 +136,8 @@ only be used for introspection.
 
 ```js
 import { TaskManagers } from 'saga-task-manager'
+
+for (const [managerID, tasks] of TaskManagers) {
+  // play with the managers
+}
 ```
