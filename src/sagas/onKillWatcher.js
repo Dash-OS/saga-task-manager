@@ -1,8 +1,10 @@
 import { call } from 'redux-saga/effects';
 
 export default function* onKillWatcher() {
-  this.handleLog('info', 'Starting Kill Watcher');
+  if (this.config.log === 'debug') {
+    this.handleLog('info', 'Starting Kill Watcher');
+  }
   yield call(() => this.awaitHandler('onKilled'));
-  this.handleLog('warn', 'KILLED!', this);
-  yield* this.cancelAll();
+  this.handleLog('warn', 'TASK MANAGER KILLED');
+  yield call([this, this.cancelAll]);
 }

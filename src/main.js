@@ -6,7 +6,7 @@ import printLog from './utils/logger';
 import handleTaskCleanup from './sagas/handleTaskCleanup';
 import onKillWatcher from './sagas/onKillWatcher';
 
-const TaskManagers = new Map();
+import { TASKMAN, TaskManagers } from './utils/context';
 
 const CreateSagaPromise = (Prom, handler, oncancel) => {
   const SagaPromise = new Prom(handler);
@@ -22,7 +22,7 @@ const buildConfig = config => ({
   overwrite: true,
   // do we want to supress errors and fail silently?
   silent: false,
-  // do we want to log internal functions?
+  // do we want to log internal functions
   log: false,
   logCollapsed: true,
   icon: '📟',
@@ -33,9 +33,7 @@ class SagaTaskMan {
   constructor(id, config) {
     this.id = id;
     this.config = buildConfig(config);
-    if (!this.config.name) {
-      this.config.name = id;
-    }
+
     this.tasks = new Map();
     this.handlers = {
       promises: new Map(),
@@ -59,7 +57,16 @@ class SagaTaskMan {
   getName = () => this.config.name;
 
   *create(category, id, fn, ...args) {
-    this.handleLog('info', 'Create Task', category, id);
+    const taskContext = { category, id };
+    if (this.config.log) {
+      taskContext.created = performance.now();
+      this.handleLog(
+        'info',
+        `Create Task: ${category}.${id}`,
+        ['%c Category: ', 'font-weight: bold;', category],
+        ['%c ID: ', 'font-weight: bold;', id],
+      );
+    }
     if (!category || !id || !fn) {
       return this.handleError(
         `Tasks must have a category, id, and fn at a minimum but received ${category}.${id} - ${fn}`,
@@ -76,6 +83,10 @@ class SagaTaskMan {
       }
 
       const task = yield spawn([this, this.run], [category, id], fn, ...args);
+
+      task[TASKMAN] = taskContext;
+      task.setContext(taskContext);
+
       this.saveTask(category, id, task, args);
 
       yield spawn([this, this.onTaskComplete], category, id, [
@@ -99,8 +110,9 @@ class SagaTaskMan {
     that may occur during the execution of the task.
   */
   *run(task, fn, ...args) {
+    let result;
     try {
-      yield call(fn, ...args);
+      result = yield call(fn, ...args);
     } catch (e) {
       /* When an error occurs at this level we do not throw it further.  We do this because
          since we are the root level of a spawn, throwing further will not propagate to any
@@ -119,7 +131,9 @@ class SagaTaskMan {
         e,
         false,
       );
+      result = e;
     }
+    return result;
   }
 
   *onTaskComplete(category, id, fn) {
@@ -133,8 +147,48 @@ class SagaTaskMan {
     try {
       yield task.done;
     } finally {
-      this.handleLog('info', 'Task Complete!', category, id);
       yield call(fn, category, id);
+      if (this.config.log) {
+        const result = task.result();
+        const context = task[TASKMAN];
+        let elapsed =
+          context && context.created && performance.now() - context.created;
+        if (elapsed > 60000) {
+          elapsed = Math.round(elapsed);
+        }
+        const logs = [
+          [
+            '%c Duration (MS): ',
+            'font-weight: bold; color: darkgreen;',
+            elapsed,
+          ],
+        ];
+        if (result === undefined) {
+          logs.push([
+            '%c Result: ',
+            'font-weight: bold; color: darkgreen;',
+            'undefined',
+          ]);
+        } else if (result instanceof Error) {
+          logs.push(
+            ['%c Result: ', 'font-weight: bold; color: red;', result.message],
+            result,
+          );
+        } else {
+          logs.push([
+            '%c Result: ',
+            'font-weight: bold; color: darkgreen;',
+            result,
+          ]);
+        }
+        this.handleLog(
+          'info',
+          `Task Complete: ${category}.${id}`,
+          ['%c Category: ', 'font-weight: bold;', category],
+          ['%c ID: ', 'font-weight: bold;', id],
+          ...logs,
+        );
+      }
     }
   }
 

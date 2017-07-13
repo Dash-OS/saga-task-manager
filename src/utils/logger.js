@@ -10,7 +10,11 @@ export default function printLog(level, ...args) {
         ''} [saga-task-manager] | ${this.getName()} | ${level.toUpperCase()} | ${args[0]}`,
     );
     for (const entry of args.slice(1)) {
-      console[level](entry);
+      if (Array.isArray(entry)) {
+        console[level](...entry);
+      } else {
+        console[level](entry);
+      }
     }
   } else {
     this.logger(
@@ -18,7 +22,11 @@ export default function printLog(level, ...args) {
         ''} [saga-task-manager] | ${this.getName()} | ${level}`,
     );
     for (const entry of args) {
-      console.info(entry);
+      if (Array.isArray(entry)) {
+        console.info(...entry);
+      } else {
+        console.info(entry);
+      }
     }
   }
 
