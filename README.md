@@ -28,20 +28,6 @@ yarn add saga-task-manager
 npm install --save saga-task-manager
 ```
 
-### Logging
-
-One helpful tool provided is the introspection of your tasks via the
-logging and introspection mechanisms.  This helps make sure that your
-sagas are performing as expected and helps track down runaway sagas.
-
-When a given task completes, it will print the duration and result of
-the task to aid in performance enhancements and debugging.
-
-![](https://user-images.githubusercontent.com/15365418/28110828-62c05d0a-66a8-11e7-8526-ccfeda990f47.png)
-
-> **Note:** When logging is not enabled, the function that handles the
-> logging is removed completely. Logging itself can have a performance
-> impact and for obvious reasons should only be enabled in development.
 
 ### Simple Example
 
@@ -118,6 +104,21 @@ function* mySaga() {
 
 
 ```
+
+### Logging
+
+One helpful tool provided is the introspection of your tasks via the
+logging and introspection mechanisms.  This helps make sure that your
+sagas are performing as expected and helps track down runaway sagas.
+
+When a given task completes, it will print the duration and result of
+the task to aid in performance enhancements and debugging.
+
+![](https://user-images.githubusercontent.com/15365418/28146988-5adc2aa8-6732-11e7-8636-c7a4439000dd.png)
+
+> **Note:** When logging is not enabled, the function that handles the
+> logging is removed completely. Logging itself can have a performance
+> impact and for obvious reasons should only be enabled in development.
 
 ### Kill All
 
