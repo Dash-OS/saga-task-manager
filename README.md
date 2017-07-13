@@ -114,7 +114,7 @@ sagas are performing as expected and helps track down runaway sagas.
 When a given task completes, it will print the duration and result of
 the task to aid in performance enhancements and debugging.
 
-![](https://user-images.githubusercontent.com/15365418/28146988-5adc2aa8-6732-11e7-8636-c7a4439000dd.png)
+![image](https://user-images.githubusercontent.com/15365418/28147046-b025f11a-6732-11e7-9b19-a4e35820f558.png)
 
 > **Note:** When logging is not enabled, the function that handles the
 > logging is removed completely. Logging itself can have a performance
