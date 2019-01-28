@@ -1,12 +1,12 @@
-import { cancel, fork, spawn, call } from 'redux-saga/effects';
-import { TASK } from 'redux-saga/utils';
-import { CANCEL } from 'redux-saga';
+import { cancel, fork, spawn, call } from "redux-saga/effects";
+import { TASK } from "redux-saga/utils";
+import { CANCEL } from "redux-saga";
 
-import printLog from './utils/logger';
-import handleTaskCleanup from './sagas/handleTaskCleanup';
-import onKillWatcher from './sagas/onKillWatcher';
+import printLog from "./utils/logger";
+import handleTaskCleanup from "./sagas/handleTaskCleanup";
+import onKillWatcher from "./sagas/onKillWatcher";
 
-import { TASKMAN, TaskManagers } from './utils/context';
+import { TASKMAN, TaskManagers } from "./utils/context";
 
 const CreateSagaPromise = (Prom, handler, oncancel) => {
   const SagaPromise = new Prom(handler);
@@ -15,7 +15,7 @@ const CreateSagaPromise = (Prom, handler, oncancel) => {
 };
 
 const buildConfig = config => ({
-  name: 'SagaTaskMan',
+  name: "SagaTaskMan",
   // should we cancel tasks if we schedule new tasks with same category, id?
   // if this is false then an error will be reported unless silent is true
   // at which point nothing will happen unless the task is cancelled first.
@@ -25,8 +25,8 @@ const buildConfig = config => ({
   // do we want to log internal functions
   log: false,
   logCollapsed: true,
-  icon: '📟',
-  ...config,
+  icon: "📟",
+  ...config
 });
 
 class SagaTaskMan {
@@ -37,7 +37,7 @@ class SagaTaskMan {
     this.tasks = new Map();
     this.handlers = {
       promises: new Map(),
-      resolvers: new Map(),
+      resolvers: new Map()
     };
 
     if (this.config.log) {
@@ -45,13 +45,13 @@ class SagaTaskMan {
         ? console.groupCollapsed
         : console.group;
       this.handleLog = printLog.bind(this);
-      this.handleLog('info', 'Task Manager Constructed', this.config);
+      this.handleLog("info", "Task Manager Constructed", this.config);
     } else {
       this.handleLog = () => {};
     }
 
     this.create = this.create.bind(this);
-    this.createHandler('onKilled');
+    this.createHandler("onKilled");
   }
 
   getName = () => this.config.name;
@@ -61,16 +61,16 @@ class SagaTaskMan {
     if (this.config.log) {
       taskContext.created = performance.now();
       this.handleLog(
-        'info',
+        "info",
         `Create Task: ${category}.${id}`,
-        ['%c Category: ', 'font-weight: bold;', category],
-        ['%c ID: ', 'font-weight: bold;', id],
+        ["%c Category: ", "font-weight: bold;", category],
+        ["%c ID: ", "font-weight: bold;", id]
       );
     }
     if (!category || !id || !fn) {
       return this.handleError(
         `Tasks must have a category, id, and fn at a minimum but received ${category}.${id} - ${fn}`,
-        'critical',
+        "critical"
       );
     }
     try {
@@ -78,7 +78,7 @@ class SagaTaskMan {
         yield call([this, this.cancel], category, id);
       } else if (yield call([this, this.taskExists], category, id)) {
         return this.handleError(
-          `When overwrite config is set to false, you must cancel tasks before scheduling them again.  While Creating Task: ${category}.${id}`,
+          `When overwrite config is set to false, you must cancel tasks before scheduling them again.  While Creating Task: ${category}.${id}`
         );
       }
 
@@ -91,7 +91,7 @@ class SagaTaskMan {
 
       yield spawn([this, this.onTaskComplete], category, id, [
         this,
-        handleTaskCleanup,
+        handleTaskCleanup
       ]);
 
       if (!this.killWatcher) {
@@ -99,7 +99,7 @@ class SagaTaskMan {
       }
     } catch (e) {
       this.handleError(
-        `Failed to create task: (${category}.${id}): ${e.message}`,
+        `Failed to create task: (${category}.${id}): ${e.message}`
       );
       throw e;
     }
@@ -119,17 +119,17 @@ class SagaTaskMan {
          handlers that have been created anyway.  Instead we will report the error.
       */
       let [category, id] = task;
-      if (typeof category === 'symbol') {
+      if (typeof category === "symbol") {
         category = category.toString();
       }
-      if (typeof id === 'symbol') {
+      if (typeof id === "symbol") {
         id = id.toString();
       }
       this.handleError(
         `uncaught while running task ${category}.${id}: ${e.message}`,
-        'critical',
+        "critical",
         e,
-        false,
+        false
       );
       result = e;
     }
@@ -158,35 +158,35 @@ class SagaTaskMan {
         }
         const logs = [
           [
-            '%c Duration (MS): ',
-            'font-weight: bold; color: darkgreen;',
-            elapsed,
-          ],
+            "%c Duration (MS): ",
+            "font-weight: bold; color: darkgreen;",
+            elapsed
+          ]
         ];
         if (result === undefined) {
           logs.push([
-            '%c Result: ',
-            'font-weight: bold; color: darkgreen;',
-            'undefined',
+            "%c Result: ",
+            "font-weight: bold; color: darkgreen;",
+            "undefined"
           ]);
         } else if (result instanceof Error) {
           logs.push(
-            ['%c Result: ', 'font-weight: bold; color: red;', result.message],
-            result,
+            ["%c Result: ", "font-weight: bold; color: red;", result.message],
+            result
           );
         } else {
           logs.push([
-            '%c Result: ',
-            'font-weight: bold; color: darkgreen;',
-            result,
+            "%c Result: ",
+            "font-weight: bold; color: darkgreen;",
+            result
           ]);
         }
         this.handleLog(
-          'info',
+          "info",
           `Task Complete: ${category}.${id}`,
-          ['%c Category: ', 'font-weight: bold;', category],
-          ['%c ID: ', 'font-weight: bold;', id],
-          ...logs,
+          ["%c Category: ", "font-weight: bold;", category],
+          ["%c ID: ", "font-weight: bold;", id],
+          ...logs
         );
       }
     }
@@ -210,7 +210,7 @@ class SagaTaskMan {
     const tasks = [];
     for (const [id, task] of categoryTasks) {
       tasks.push(
-        yield fork([this, this.cancelTask], categoryTasks, category, id, task),
+        yield fork([this, this.cancelTask], categoryTasks, category, id, task)
       );
     }
     return tasks;
@@ -285,7 +285,7 @@ class SagaTaskMan {
     if (categoryTasks.has(id)) {
       this.handleError(
         `Failed to Save Task, ${category}.${id} already exists`,
-        'critical',
+        "critical"
       );
     } else {
       categoryTasks.set(id, task);
@@ -296,25 +296,25 @@ class SagaTaskMan {
     const handler = this.handlers.resolvers.get(`onCategory.${category}`);
     if (!handler) {
       this.handleLog(
-        'warn',
-        `Tried to cancel ${category} but it was not found in resolvers!`,
+        "warn",
+        `Tried to cancel ${category} but it was not found in resolvers!`
       );
     } else {
       handler.resolve();
     }
   };
 
-  handleError = (msg, level = 'error', e, shouldThrow = true) => {
-    this.handleLog('error', msg, e);
+  handleError = (msg, level = "error", e, shouldThrow = true) => {
+    this.handleLog("error", msg, e);
     if (shouldThrow) {
-      if (this.config.silent === true && level !== 'critical') {
+      if (this.config.silent === true && level !== "critical") {
         return;
       }
-      if (this.config.silent === 'critical') {
+      if (this.config.silent === "critical") {
         return;
       }
       throw new Error(`[${this.getName()}] ${msg}`);
-    } else if (level === 'critical') {
+    } else if (level === "critical") {
       return console.error(msg);
     }
   };
@@ -326,7 +326,7 @@ class SagaTaskMan {
         Promise,
         (resolve, reject) =>
           this.handlers.resolvers.set(handler, { resolve, reject }),
-        () => this.handleCancelled(handler, ...args),
+        () => this.handleCancelled(handler, ...args)
       )
         .then(r => {
           this.removeHandler(handler);
@@ -335,7 +335,7 @@ class SagaTaskMan {
         .catch(err => {
           this.removeHandler(handler);
           throw err;
-        }),
+        })
     );
 
   removeHandler = handler => {
@@ -346,15 +346,15 @@ class SagaTaskMan {
   kill = () => {
     if (this.killed) {
       this.handleLog(
-        'warn',
-        'Process is already killed but you called kill on it again!',
+        "warn",
+        "Process is already killed but you called kill on it again!"
       );
       return;
     }
     this.killed = true;
 
     const killPromise = this.handlers.promises
-      .get('onKilled')
+      .get("onKilled")
       .then(r => {
         if (!this.deleted) {
           TaskManagers.delete(this.id);
@@ -364,7 +364,7 @@ class SagaTaskMan {
       .catch(err => {
         this.handleError(
           `Failed to Kill Task Manager: ${err.message}`,
-          'critical',
+          "critical"
         );
         if (!this.deleted) {
           TaskManagers.delete(this.id);
@@ -372,7 +372,7 @@ class SagaTaskMan {
         return err;
       });
 
-    this.handlers.resolvers.get('onKilled').resolve();
+    this.handlers.resolvers.get("onKilled").resolve();
 
     return killPromise;
   };
