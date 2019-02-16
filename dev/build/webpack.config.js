@@ -20,7 +20,7 @@ export default function getWebpackConfiguration(config) {
     mode: isProduction ? 'production' : 'development',
     target: 'web',
 
-    devtool: 'inline-source-map',
+    devtool: 'source-map',
 
     entry: [path.resolve(rootDir, './src/index.js')],
 
@@ -59,7 +59,12 @@ export default function getWebpackConfiguration(config) {
                       useBuiltIns: 'usage',
                       shippedProposals: true,
                       targets: {
-                        browsers: ['last 2 versions'],
+                        browsers: [
+                          'last 2 Chrome versions',
+                          'last 2 Firefox versions',
+                          'last 3 Edge versions',
+                          'last 1 Safari versions',
+                        ],
                       },
                     },
                   ],
