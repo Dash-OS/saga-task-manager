@@ -21,6 +21,7 @@ function* run(...args) {
 function* taskRunner() {
   console.log('\n-- create next --\n');
   yield call(manager.create, 'one', 'two', run, 1, 2, 3);
+  yield call(manager.create, 'one', 'two', run, 1, 2, 3);
   console.log('\n-- done create --\n');
 }
 

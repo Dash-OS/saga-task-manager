@@ -12,6 +12,12 @@ module.exports = api => {
           shippedProposals: true,
           targets: {
             node: '10.15.0',
+            browsers: [
+              'last 2 Chrome versions',
+              'last 2 Firefox versions',
+              'last 3 Edge versions',
+              'last 1 Safari versions',
+            ],
           },
         },
       ],

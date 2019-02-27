@@ -3,6 +3,7 @@ import path from 'path';
 import webpack from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import RootDir from 'app-root-dir';
+import TerserPlugin from 'terser-webpack-plugin';
 import pkg from '../../package.json';
 
 import { log } from './utils';
@@ -18,7 +19,6 @@ export default function getWebpackConfiguration(config) {
 
   return {
     mode: isProduction ? 'production' : 'development',
-    target: 'web',
 
     devtool: 'source-map',
 
@@ -37,7 +37,19 @@ export default function getWebpackConfiguration(config) {
         'process.env.NODE_ENV': process.env.NODE_ENV,
       }),
     ],
-
+    optimization: {
+      minimizer: [
+        new TerserPlugin({
+          cache: true,
+          parallel: true,
+          sourceMap: true,
+          terserOptions: {
+            mangle: false,
+            compress: false,
+          },
+        }),
+      ],
+    },
     module: {
       // strictExportPresence: true,
       rules: [
@@ -59,7 +71,9 @@ export default function getWebpackConfiguration(config) {
                       useBuiltIns: 'usage',
                       shippedProposals: true,
                       targets: {
+                        node: '10.15.0',
                         browsers: [
+                          // 'last 2 versions',
                           'last 2 Chrome versions',
                           'last 2 Firefox versions',
                           'last 3 Edge versions',

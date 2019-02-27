@@ -76,8 +76,12 @@ function SagaTaskManager(managerID, _config) {
      * Cancel a task by a category (all category tasks) or a category and id.
      */
     *cancel(categoryID, id) {
-      if (!id) return yield call(manager.killCategory, categoryID);
-      return yield call(manager.cancelTask, categoryID, id);
+      if (!id) {
+        const result = yield call(manager.killCategory, categoryID);
+        return result;
+      }
+      const result = yield call(manager.cancelTask, categoryID, id);
+      return result;
     },
 
     /**
@@ -89,19 +93,21 @@ function SagaTaskManager(managerID, _config) {
     *cancelCategory(categoryID) {
       const tasks = getAllSagaTasksFromCategory(state, categoryID);
       if (!tasks) return;
-      return yield cancel(tasks);
+      const result = yield cancel(tasks);
+      return result;
     },
     *cancelTask(categoryID, taskID) {
       const task = getSagaTaskFromCategory(state, categoryID, taskID);
       if (!task || !task.isRunning()) return;
-      return yield cancel(task);
+      const result = yield cancel(task);
+      return result;
     },
 
     /**
      * Cancels all tasks the manager handles.
      */
     *cancelAll() {
-      return yield [...state.tasks].map(([category]) =>
+      const result = yield [...state.tasks].map(([category]) =>
         fork(function* handleForkedCancelCategory() {
           try {
             yield call(manager.cancelCategory, category);
@@ -116,6 +122,7 @@ function SagaTaskManager(managerID, _config) {
           }
         }),
       );
+      return result;
     },
 
     *create(categoryID, taskID, fn, ...args) {
@@ -139,7 +146,8 @@ function SagaTaskManager(managerID, _config) {
         );
       }
 
-      return yield call(createTask, manager, state, context);
+      const result = yield call(createTask, manager, state, context);
+      return result;
     },
 
     /**
