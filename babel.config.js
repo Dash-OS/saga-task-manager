@@ -1,5 +1,5 @@
 module.exports = api => {
-  console.info('[BABEL] | Gets Configuration');
+  // console.info('[BABEL] | Gets Configuration');
 
   api.cache(true);
 
@@ -8,6 +8,7 @@ module.exports = api => {
       [
         '@babel/preset-env',
         {
+          corejs: '3',
           useBuiltIns: 'usage',
           shippedProposals: true,
           targets: {
@@ -23,6 +24,7 @@ module.exports = api => {
       ],
     ],
     plugins: [
+      '@babel/plugin-transform-runtime',
       // 'babel-plugin-redux-saga',
       '@babel/plugin-proposal-class-properties',
       '@babel/plugin-proposal-optional-chaining',

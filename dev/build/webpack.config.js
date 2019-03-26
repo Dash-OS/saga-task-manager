@@ -69,6 +69,7 @@ export default function getWebpackConfiguration(config) {
                     {
                       modules: false,
                       useBuiltIns: 'usage',
+                      corejs: '3',
                       shippedProposals: true,
                       targets: {
                         node: '10.15.0',
